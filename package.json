@@ -1,0 +1,11 @@
+{
+  "name": "sign_in_up",
+  "version": "1.0.0",
+  "description": "This folder consists of Login / Sign Up page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yohjit Chopra , Dipansh Garg",
+  "license": "ISC"
+}
