@@ -32,7 +32,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const data = await response.json();
     if (response.ok) {
       alert(data.message); // Success message
-      window.location.href = '/welcome.html'; // Redirect to welcome page
+      window.location.href = '/welcome'; // Redirect to welcome page
     } else {
       alert(data.error); // Error message
     }

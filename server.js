@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+const path = require("path");
 const base = `${__dirname}/web`;
 const port = 5000;
 
@@ -30,39 +31,42 @@ async function connect() {
 connect();
 
 app.post("/login", async (req, res) => {
-  const { identifier, password } = req.body;
-  let user;
+  console.log("Sucessful login")
+});
+
+app.post("/signup", async (req, res) => {
+  const { username, email, password } = req.body;
 
   try {
-    // Check if the identifier is an email or username
-    if (validateEmail(identifier)) {
-      user = await User.findOne({ email: identifier, password });
-    } else {
-      user = await User.findOne({ username: identifier, password });
+    // Check if the email or username is already registered
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(409).json({ error: "Email or username already exists" });
     }
 
-    if (user) {
-      // Successful login
-      res.json({ message: "Login successful" });
-    } else {
-      // Incorrect credentials
-      res.status(401).json({ error: "Invalid credentials" });
-    }
+    // Create a new user
+    const newUser = new User({ username, email, password });
+    await newUser.save();
+
+    // Sign up successful
+    res.json({ message: "Sign up successful" });
   } catch (error) {
-    // Error while querying the database
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-function validateEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //Here, [^\s@]+ means there can be any string including @ symbol, @ means there must be @ here, \. means there must be a .(dot) here.
-  return re.test(String(email).toLowerCase());
-}
 
 app.get("/", (req, res) => {
   res.sendFile(`${base}/index.html`);
 });
 
-app.listen(`${port}`, () => {
-  console.log('Server is running on port : ', `${port}`);
+app.get("/signup", (req, res) => {
+  res.sendFile(`${base}/sign_up.html`);
+});
+
+app.get("/welcome", (req, res) => {
+  res.sendFile(`${base}/welcome.html`);
+});
+
+app.listen(port, () => {
+  console.log('Server is running on port:', port);
 });
