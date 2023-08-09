@@ -1,13 +1,35 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
+const session = require("express-session");
 const app = express();
 const path = require("path");
 const base = `${__dirname}/web`;
 const port = 5001;
 
+require('dotenv').config(); // Load variables from .env file
+
+const secretKey = process.env.MY_APP_SECRET_KEY;
+// ... (use secretKey where needed)
+
 app.use(express.static('web'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+// Initialize Passport
+app.use(passport.initialize());
+
+
+// Configure session
+app.use(session({
+  secret: secretKey, // Replace with a secure secret key
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.session());
 
 uri = "mongodb+srv://dipansh:qwerty99@mydb.chvnp5g.mongodb.net/?retryWrites=true&w=majority";
 
@@ -29,6 +51,43 @@ async function connect() {
 }
 
 connect();
+
+passport.use(new LocalStrategy({
+  usernameField: 'identifier', // This field should match the name in the login request
+  passwordField: 'password'
+},
+async (identifier, password, done) => {
+  try {
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }],
+      password: password
+    });
+
+    if (user) {
+      return done(null, user);
+    } else {
+      return done(null, false, { message: "Invalid credentials" });
+    }
+  } catch (error) {
+    return done(error);
+  }
+}
+));
+
+// Serialize user for session
+passport.serializeUser((user, done) => {
+done(null, user.id);
+});
+
+// Deserialize user
+passport.deserializeUser(async (id, done) => {
+try {
+  const user = await User.findById(id);
+  done(null, user);
+} catch (error) {
+  done(error);
+}
+});
 
 app.post("/login", async (req, res) => {
   const { identifier, password } = req.body;

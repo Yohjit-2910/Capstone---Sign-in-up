@@ -9,7 +9,7 @@ function toggleLoginType() {
     usernameInput.style.display = 'block';
 
     document.getElementById('username').setAttribute('required', 'required');
-    document.getElementById('email').remveAttribute('required');
+    document.getElementById('email').removeAttribute('required');
   } else {
     emailInput.style.display = 'block';
     usernameInput.style.display = 'none';
