@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const app = express();
 const path = require("path");
 const base = `${__dirname}/web`;
-const port = 5000;
+const port = 5001;
 
 app.use(express.static('web'));
 app.use(express.json());
@@ -31,7 +31,26 @@ async function connect() {
 connect();
 
 app.post("/login", async (req, res) => {
-  console.log("Sucessful login")
+  const { identifier, password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { username: identifier }],
+      password: password
+    });
+
+    if (user) {
+      res.json({
+        message: "Login successful",
+        redirectTo: "/welcome" // Redirect to welcome.html on success
+      });
+      console.log("Successful login")
+    } else {
+      res.status(401).json({ error: "Invalid credentials" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.post("/signup", async (req, res) => {
