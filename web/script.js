@@ -1,18 +1,28 @@
+//Switching between username and email
 function toggleLoginType() {
   const emailInput = document.getElementById('emailInput');
   const usernameInput = document.getElementById('usernameInput');
   const switchInput = document.getElementById('switchInput');
+
   if (switchInput.checked) {
     emailInput.style.display = 'none';
     usernameInput.style.display = 'block';
+
+    document.getElementById('username').setAttribute('required', 'required');
+    document.getElementById('email').remveAttribute('required');
   } else {
     emailInput.style.display = 'block';
     usernameInput.style.display = 'none';
+
+    document.getElementById('username').setAttribute('required', 'required');
+    document.getElementById('email').removeAttribute('required');
   }
 }
 
+//For Authentication, matching credentials from client side with those of database
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
-  e.preventDefault(); // Prevent form submission
+  e.preventDefault();
 
   let identifier;
   if (document.getElementById('switchInput').checked) {
@@ -28,16 +38,22 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     },
     body: JSON.stringify({ identifier, password })
   });
+
+  //For redirecting user to welcome page, if the credentials are correct and a response.ok is received
+
   try {
     const data = await response.json();
     if (response.ok) {
-      alert(data.message); // Success message
-      window.location.href = '/welcome'; // Redirect to welcome page
+      if (data.redirectTo) {
+        window.open(data.redirectTo, "_blank");
+      } else {
+        alert(data.message);
+      }
     } else {
-      alert(data.error); // Error message
+      alert(data.error);
     }
   } catch (error) {
     console.error(error);
-    alert('An error occurred.'); // Catch other errors
+    alert('An error occurred.');
   }
 });
