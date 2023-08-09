@@ -1,30 +1,43 @@
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
-const switchInput = document.getElementById('switchInput');
-const loginForm = document.getElementById('login-form');
-
-switchInput.addEventListener('change', () => {
+function toggleLoginType() {
+  const emailInput = document.getElementById('emailInput');
+  const usernameInput = document.getElementById('usernameInput');
+  const switchInput = document.getElementById('switchInput');
   if (switchInput.checked) {
-    emailInput.setAttribute('type', 'text');
-    emailInput.setAttribute('placeholder', 'Username');
+    emailInput.style.display = 'none';
+    usernameInput.style.display = 'block';
   } else {
-    emailInput.setAttribute('type', 'email');
-    emailInput.setAttribute('placeholder', 'Email ID');
+    emailInput.style.display = 'block';
+    usernameInput.style.display = 'none';
   }
-});
+}
 
-loginForm.addEventListener('submit', (event) => {
-  event.preventDefault(); // Prevent form submission to handle login logic manually
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault(); // Prevent form submission
 
-  const emailOrUsername = emailInput.value;
-  const password = passwordInput.value;
-
-  // Replace the following condition with your actual authentication logic
-  if (emailOrUsername === 'admin' && password === 'admin') {
-    // Redirect to welcome.html (change the URL to your welcome page)
-    window.location.href = 'welcome.html';
+  let identifier;
+  if (document.getElementById('switchInput').checked) {
+    identifier = document.getElementById('username').value;
   } else {
-    // Add an error message or handle incorrect credentials as desired
-    console.log('Invalid email/username or password');
+    identifier = document.getElementById('email').value;
+  }
+  const password = document.getElementById('password').value;
+  const response = await fetch('/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ identifier, password })
+  });
+  try {
+    const data = await response.json();
+    if (response.ok) {
+      alert(data.message); // Success message
+      window.location.href = '/welcome'; // Redirect to welcome page
+    } else {
+      alert(data.error); // Error message
+    }
+  } catch (error) {
+    console.error(error);
+    alert('An error occurred.'); // Catch other errors
   }
 });
